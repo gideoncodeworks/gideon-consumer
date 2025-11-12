@@ -27,6 +27,7 @@ import {
 import { sendChatMessage } from '@/lib/chat';
 import { useAuth } from '@/lib/auth-context';
 import AuthModal from '@/components/AuthModal';
+import SettingsModal from '@/components/SettingsModal';
 
 interface Message {
   id: string;
@@ -50,6 +51,7 @@ const FREE_MESSAGE_LIMIT = 5;
 export default function ChatDemoPage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [anonymousMessageCount, setAnonymousMessageCount] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
 
@@ -354,6 +356,18 @@ export default function ChatDemoPage() {
     setShowSidebar(false); // Close sidebar on mobile after creating new chat
   };
 
+  const handleClearConversations = () => {
+    // Create a fresh conversation
+    const newConv: Conversation = {
+      id: Date.now().toString(),
+      title: 'New conversation',
+      messages: [],
+      updatedAt: new Date(),
+    };
+    setConversations([newConv]);
+    setCurrentConversationId(newConv.id);
+  };
+
   return (
     <div className="flex h-full w-full max-w-full bg-white dark:bg-gray-900 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
@@ -414,7 +428,10 @@ export default function ChatDemoPage() {
                   </span>
                 </div>
               </div>
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300"
+              >
                 <Settings className="h-4 w-4" />
                 Settings
               </button>
@@ -435,7 +452,10 @@ export default function ChatDemoPage() {
                 <User className="h-4 w-4" />
                 Sign in
               </button>
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300"
+              >
                 <Settings className="h-4 w-4" />
                 Settings
               </button>
@@ -808,6 +828,13 @@ export default function ChatDemoPage() {
 
       {/* Auth Modal */}
       <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onClearConversations={handleClearConversations}
+      />
 
       {/* Upgrade Prompt Modal */}
       {showUpgradePrompt && (
