@@ -4,8 +4,8 @@
   "description": "Chat with Claude, GPT-4, and Gemini. Generate images with DALL-E 3. All in one platform.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#a855f7",
+  "background_color": "#000000",
+  "theme_color": "#00FFFF",
   "orientation": "portrait-primary",
   "icons": [
     {
