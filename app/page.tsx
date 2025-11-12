@@ -28,6 +28,7 @@ import { sendChatMessage } from '@/lib/chat';
 import { useAuth } from '@/lib/auth-context';
 import AuthModal from '@/components/AuthModal';
 import SettingsModal from '@/components/SettingsModal';
+import ErrorToast from '@/components/ErrorToast';
 
 interface Message {
   id: string;
@@ -54,6 +55,7 @@ export default function ChatDemoPage() {
   const [showSettings, setShowSettings] = useState(false);
   const [anonymousMessageCount, setAnonymousMessageCount] = useState(0);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Load anonymous message count from localStorage
   useEffect(() => {
@@ -202,19 +204,26 @@ export default function ChatDemoPage() {
       );
     } catch (error: any) {
       console.error('Image generation error:', error);
+
+      // Show user-friendly error message
+      let errorMsg = 'Unable to generate image. Please try again.';
+      if (error.message.includes('API key')) {
+        errorMsg = 'Image generation service is temporarily unavailable.';
+      } else if (error.message.includes('rate limit')) {
+        errorMsg = 'Too many requests. Please wait a moment and try again.';
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        errorMsg = 'Network error. Please check your connection and try again.';
+      }
+
+      setErrorMessage(errorMsg);
+
+      // Remove the placeholder message
       setConversations(prev =>
         prev.map(conv =>
           conv.id === currentConversationId
             ? {
                 ...conv,
-                messages: conv.messages.map(msg =>
-                  msg.id === imageMessageId
-                    ? {
-                        ...msg,
-                        content: `Failed to generate image: ${error.message}`,
-                      }
-                    : msg
-                ),
+                messages: conv.messages.filter(msg => msg.id !== imageMessageId),
               }
             : conv
         )
@@ -325,16 +334,28 @@ export default function ChatDemoPage() {
       },
       onError: (error) => {
         console.error('Chat error:', error);
+
+        // User-friendly error messages
+        let errorMsg = 'Unable to send message. Please try again.';
+        if (error.message?.includes('API key') || error.message?.includes('api key')) {
+          errorMsg = 'Chat service is temporarily unavailable.';
+        } else if (error.message?.includes('rate limit')) {
+          errorMsg = 'Too many requests. Please wait a moment and try again.';
+        } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+          errorMsg = 'Network error. Please check your connection and try again.';
+        } else if (error.message?.includes('timeout')) {
+          errorMsg = 'Request timed out. Please try again.';
+        }
+
+        setErrorMessage(errorMsg);
+
+        // Remove placeholder message instead of showing error in chat
         setConversations(prev =>
           prev.map(conv =>
             conv.id === currentConversationId
               ? {
                   ...conv,
-                  messages: conv.messages.map(msg =>
-                    msg.id === assistantMessageId
-                      ? { ...msg, content: 'Sorry, there was an error processing your message. Please try again.' }
-                      : msg
-                  ),
+                  messages: conv.messages.filter(msg => msg.id !== assistantMessageId),
                 }
               : conv
           )
@@ -895,6 +916,14 @@ export default function ChatDemoPage() {
             </p>
           </div>
         </div>
+      )}
+
+      {/* Error Toast */}
+      {errorMessage && (
+        <ErrorToast
+          message={errorMessage}
+          onClose={() => setErrorMessage(null)}
+        />
       )}
     </div>
   );
