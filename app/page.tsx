@@ -355,7 +355,7 @@ export default function ChatDemoPage() {
   };
 
   return (
-    <div className="flex h-full w-full bg-white dark:bg-gray-900 overflow-hidden">
+    <div className="flex h-full w-full max-w-full bg-white dark:bg-gray-900 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
       {showSidebar && (
         <div
@@ -445,10 +445,10 @@ export default function ChatDemoPage() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Chat Header */}
-        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-gray-900 pt-[env(safe-area-inset-top)] min-h-[calc(3.5rem+env(safe-area-inset-top))]">
-          <div className="flex items-center gap-3">
+        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-gray-900 pt-[env(safe-area-inset-top)] min-h-[calc(3.5rem+env(safe-area-inset-top))] min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setShowSidebar(!showSidebar)}
@@ -457,13 +457,13 @@ export default function ChatDemoPage() {
               <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Sparkles className="h-5 w-5 text-purple-500" />
               <h1 className="font-semibold text-gray-900 dark:text-white">Gideon</h1>
             </div>
 
             {/* Model Picker */}
-            <div className="relative">
+            <div className="relative flex-shrink-0 hidden sm:block">
               <button
                 onClick={() => setShowModelPicker(!showModelPicker)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-xs font-medium text-gray-700 dark:text-gray-300"
@@ -518,21 +518,21 @@ export default function ChatDemoPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
             {user ? (
-              <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                 Pro Plan • 156/500 messages today
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="text-xs text-gray-500 dark:text-gray-400 hidden md:block whitespace-nowrap">
                   {FREE_MESSAGE_LIMIT - anonymousMessageCount} free messages left
                 </div>
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="text-xs px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
+                  className="text-xs px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors whitespace-nowrap hidden sm:inline-block"
                 >
-                  Sign up for unlimited
+                  Sign up
                 </button>
               </div>
             )}
@@ -571,7 +571,7 @@ export default function ChatDemoPage() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 md:py-8 pb-24">
+            <div className="max-w-3xl w-full mx-auto px-4 md:px-6 py-4 md:py-8 pb-24 box-border">
               {currentConversation.messages.map((message, idx) => (
                 <div
                   key={message.id}
@@ -583,21 +583,21 @@ export default function ChatDemoPage() {
                 >
                   {message.role === 'user' ? (
                     // User Message (Bubble style)
-                    <div className="max-w-[85%] md:max-w-[80%]">
-                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-[18px] rounded-tr-md px-4 py-3 shadow-sm">
+                    <div className="max-w-[85%] md:max-w-[80%] min-w-0">
+                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-[18px] rounded-tr-md px-4 py-3 shadow-sm break-words">
                         {message.imageUrl ? (
                           <div className="space-y-3">
                             <img
                               src={message.imageUrl}
                               alt={message.content}
-                              className="w-full rounded-lg shadow-lg"
+                              className="w-full rounded-lg shadow-lg max-w-full"
                             />
-                            <div className="text-xs text-white/90 leading-relaxed">
+                            <div className="text-xs text-white/90 leading-relaxed break-words">
                               {message.content}
                             </div>
                           </div>
                         ) : (
-                          <div className="whitespace-pre-wrap text-[15px] leading-[22px]">
+                          <div className="whitespace-pre-wrap text-[15px] leading-[22px] break-words overflow-wrap-anywhere">
                             {message.content}
                           </div>
                         )}
@@ -605,27 +605,27 @@ export default function ChatDemoPage() {
                     </div>
                   ) : (
                     // AI Message (Avatar + No bubble style)
-                    <div className="flex gap-3 max-w-[90%] md:max-w-[85%]">
+                    <div className="flex gap-3 max-w-[90%] md:max-w-[85%] min-w-0">
                       {/* Avatar */}
                       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
                         G
                       </div>
 
                       {/* Message Content */}
-                      <div className="flex-1 pt-1">
+                      <div className="flex-1 pt-1 min-w-0">
                         {message.imageUrl ? (
                           <div className="space-y-3">
                             <img
                               src={message.imageUrl}
                               alt={message.content}
-                              className="w-full rounded-lg shadow-lg"
+                              className="w-full rounded-lg shadow-lg max-w-full"
                             />
-                            <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                            <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed break-words">
                               {message.content}
                             </div>
                           </div>
                         ) : (
-                          <div className="whitespace-pre-wrap text-[15px] md:text-sm leading-[24px] text-gray-900 dark:text-gray-100">
+                          <div className="whitespace-pre-wrap text-[15px] md:text-sm leading-[24px] text-gray-900 dark:text-gray-100 break-words overflow-wrap-anywhere">
                             {message.content}
                           </div>
                         )}
@@ -670,14 +670,14 @@ export default function ChatDemoPage() {
         <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
           <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 md:py-4">
             {imageMode && (
-              <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-4 py-2 rounded-lg">
-                <Wand2 className="h-4 w-4 text-purple-500" />
-                <span className="text-gray-700 dark:text-gray-300">
-                  <strong>Image generation mode</strong> - Describe the image you want to create
+              <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-3 py-2 rounded-lg overflow-hidden">
+                <Wand2 className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                <span className="text-gray-700 dark:text-gray-300 min-w-0 flex-1">
+                  <strong>Image mode</strong> <span className="hidden sm:inline">- Describe the image you want to create</span>
                 </span>
 
                 {/* Image Model Picker */}
-                <div className="relative ml-2">
+                <div className="relative ml-auto flex-shrink-0">
                   <button
                     onClick={() => setShowImageModelPicker(!showImageModelPicker)}
                     className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 transition-colors text-xs font-medium text-gray-700 dark:text-gray-300"
