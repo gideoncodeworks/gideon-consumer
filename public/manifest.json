@@ -1,0 +1,35 @@
+{
+  "name": "Gideon AI - Multi-Model Chat & Image Generation",
+  "short_name": "Gideon AI",
+  "description": "Chat with Claude, GPT-4, and Gemini. Generate images with DALL-E 3. All in one platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#a855f7",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "short_name": "Chat",
+      "description": "Start a new conversation",
+      "url": "/",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Generate Image",
+      "short_name": "Image",
+      "description": "Create an AI image",
+      "url": "/?mode=image",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ]
+}
