@@ -22,6 +22,7 @@ import {
   LogOut,
   Image as ImageIcon,
   Wand2,
+  Menu,
 } from 'lucide-react';
 import { sendChatMessage } from '@/lib/chat';
 import { useAuth } from '@/lib/auth-context';
@@ -103,6 +104,7 @@ export default function ChatDemoPage() {
   const [selectedModel, setSelectedModel] = useState('auto');
   const [imageMode, setImageMode] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentConversation = conversations.find(c => c.id === currentConversationId);
@@ -347,12 +349,23 @@ export default function ChatDemoPage() {
     };
     setConversations([newConv, ...conversations]);
     setCurrentConversationId(newConv.id);
+    setShowSidebar(false); // Close sidebar on mobile after creating new chat
   };
 
   return (
     <div className="flex h-screen bg-white dark:bg-gray-900">
+      {/* Mobile Sidebar Backdrop */}
+      {showSidebar && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <div className="w-64 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-gray-50 dark:bg-gray-950">
+      <div className={`w-64 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-gray-50 dark:bg-gray-950
+        ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0 transition-transform duration-300 fixed md:relative h-full z-50`}>
         {/* Sidebar Header */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-800">
           <button
@@ -370,7 +383,10 @@ export default function ChatDemoPage() {
             {conversations.map(conv => (
               <button
                 key={conv.id}
-                onClick={() => setCurrentConversationId(conv.id)}
+                onClick={() => {
+                  setCurrentConversationId(conv.id);
+                  setShowSidebar(false); // Close sidebar on mobile after selection
+                }}
                 className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors flex items-center justify-between group ${
                   conv.id === currentConversationId
                     ? 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white'
@@ -429,8 +445,16 @@ export default function ChatDemoPage() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-6 bg-white dark:bg-gray-900">
+        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-purple-500" />
               <h1 className="font-semibold text-gray-900 dark:text-white">Gideon</h1>
