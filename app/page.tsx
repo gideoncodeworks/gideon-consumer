@@ -355,7 +355,7 @@ export default function ChatDemoPage() {
   };
 
   return (
-    <div className="flex h-screen bg-white dark:bg-gray-900">
+    <div className="flex h-full w-full bg-white dark:bg-gray-900 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
       {showSidebar && (
         <div
@@ -367,7 +367,7 @@ export default function ChatDemoPage() {
       {/* Sidebar */}
       <div className={`w-64 border-r border-gray-200 dark:border-gray-800 flex flex-col bg-gray-50 dark:bg-gray-950
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0 transition-transform duration-300 fixed md:relative h-full z-50`}>
+        md:translate-x-0 transition-transform duration-300 fixed md:relative h-full max-h-full z-50 overflow-hidden`}>
         {/* Sidebar Header */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-800">
           <button
@@ -447,7 +447,7 @@ export default function ChatDemoPage() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-gray-900">
+        <div className="h-14 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 md:px-6 bg-white dark:bg-gray-900 pt-[env(safe-area-inset-top)] min-h-[calc(3.5rem+env(safe-area-inset-top))]">
           <div className="flex items-center gap-3">
             {/* Mobile Menu Button */}
             <button
@@ -540,7 +540,7 @@ export default function ChatDemoPage() {
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain">
           {!currentConversation?.messages.length ? (
             <div className="h-full flex items-center justify-center">
               <div className="text-center max-w-md px-6">
@@ -667,7 +667,7 @@ export default function ChatDemoPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
           <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 md:py-4">
             {imageMode && (
               <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-4 py-2 rounded-lg">
