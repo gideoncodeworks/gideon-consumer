@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * Consumer Chat Interface Demo
- * ChatGPT/Claude hybrid UI for usegideon.com
+ * Consumer Chat Interface - Real AI Integration
+ * ChatGPT/Claude/Gemini hybrid UI for usegideon.com
  */
 
 import { useState, useRef, useEffect } from 'react';
@@ -20,6 +20,7 @@ import {
   X,
   ChevronDown,
 } from 'lucide-react';
+import { sendChatMessage } from '@/lib/chat';
 
 interface Message {
   id: string;
@@ -90,8 +91,8 @@ export default function ChatDemoPage() {
     scrollToBottom();
   }, [currentConversation?.messages]);
 
-  const handleSend = () => {
-    if (!inputValue.trim() || !currentConversation) return;
+  const handleSend = async () => {
+    if (!inputValue.trim() || !currentConversation || isStreaming) return;
 
     // Add user message
     const userMessage: Message = {
@@ -113,33 +114,80 @@ export default function ChatDemoPage() {
       )
     );
 
+    const currentInput = inputValue;
     setInputValue('');
     setIsStreaming(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "I'd be happy to help with that! This is a demo interface showing how Gideon will work - a clean, fast chat experience that combines the best of ChatGPT and Claude.\n\nIn the real app, I would route your question to the optimal AI model and give you the best possible answer.",
-        timestamp: new Date(),
-        model: selectedModel === 'auto' ? 'GPT-4o' : selectedModel,
-      };
+    // Create placeholder assistant message
+    const assistantMessageId = (Date.now() + 1).toString();
+    const placeholderMessage: Message = {
+      id: assistantMessageId,
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      model: selectedModel,
+    };
 
-      setConversations(prev =>
-        prev.map(conv =>
-          conv.id === currentConversationId
-            ? {
-                ...conv,
-                messages: [...conv.messages, assistantMessage],
-                updatedAt: new Date(),
-              }
-            : conv
-        )
-      );
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.id === currentConversationId
+          ? {
+              ...conv,
+              messages: [...conv.messages, placeholderMessage],
+              updatedAt: new Date(),
+            }
+          : conv
+      )
+    );
 
-      setIsStreaming(false);
-    }, 1500);
+    // Get conversation history for API
+    const apiMessages = [...currentConversation.messages, userMessage].map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    // Stream response from real AI
+    await sendChatMessage({
+      messages: apiMessages,
+      model: selectedModel,
+      onChunk: (chunk) => {
+        setConversations(prev =>
+          prev.map(conv =>
+            conv.id === currentConversationId
+              ? {
+                  ...conv,
+                  messages: conv.messages.map(msg =>
+                    msg.id === assistantMessageId
+                      ? { ...msg, content: msg.content + chunk }
+                      : msg
+                  ),
+                }
+              : conv
+          )
+        );
+      },
+      onComplete: (fullResponse) => {
+        setIsStreaming(false);
+      },
+      onError: (error) => {
+        console.error('Chat error:', error);
+        setConversations(prev =>
+          prev.map(conv =>
+            conv.id === currentConversationId
+              ? {
+                  ...conv,
+                  messages: conv.messages.map(msg =>
+                    msg.id === assistantMessageId
+                      ? { ...msg, content: 'Sorry, there was an error processing your message. Please try again.' }
+                      : msg
+                  ),
+                }
+              : conv
+          )
+        );
+        setIsStreaming(false);
+      },
+    });
   };
 
   const handleNewChat = () => {
