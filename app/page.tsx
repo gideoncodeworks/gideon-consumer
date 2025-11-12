@@ -105,6 +105,8 @@ export default function ChatDemoPage() {
   const [imageMode, setImageMode] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [selectedImageModel, setSelectedImageModel] = useState<'dall-e-3' | 'imagen-3'>('dall-e-3');
+  const [showImageModelPicker, setShowImageModelPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentConversation = conversations.find(c => c.id === currentConversationId);
@@ -148,7 +150,7 @@ export default function ChatDemoPage() {
       role: 'assistant',
       content: 'Generating image...',
       timestamp: new Date(),
-      model: 'DALL-E 3',
+      model: selectedImageModel === 'dall-e-3' ? 'DALL-E 3' : 'Imagen 3',
       type: 'image',
     };
 
@@ -168,7 +170,7 @@ export default function ChatDemoPage() {
       const response = await fetch('/api/image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, model: selectedImageModel }),
       });
 
       const data = await response.json();
@@ -639,6 +641,43 @@ export default function ChatDemoPage() {
                 <span className="text-gray-700 dark:text-gray-300">
                   <strong>Image generation mode</strong> - Describe the image you want to create
                 </span>
+
+                {/* Image Model Picker */}
+                <div className="relative ml-2">
+                  <button
+                    onClick={() => setShowImageModelPicker(!showImageModelPicker)}
+                    className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800 transition-colors text-xs font-medium text-gray-700 dark:text-gray-300"
+                  >
+                    {selectedImageModel === 'dall-e-3' ? 'DALL-E 3' : 'Imagen 3'}
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+
+                  {showImageModelPicker && (
+                    <div className="absolute top-full mt-1 left-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-1 min-w-[140px] z-10">
+                      <button
+                        onClick={() => {
+                          setSelectedImageModel('dall-e-3');
+                          setShowImageModelPicker(false);
+                        }}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-700 dark:text-gray-300"
+                      >
+                        <span>DALL-E 3</span>
+                        {selectedImageModel === 'dall-e-3' && <Check className="h-3.5 w-3.5 text-purple-500" />}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedImageModel('imagen-3');
+                          setShowImageModelPicker(false);
+                        }}
+                        className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-xs text-gray-700 dark:text-gray-300"
+                      >
+                        <span>Imagen 3</span>
+                        {selectedImageModel === 'imagen-3' && <Check className="h-3.5 w-3.5 text-purple-500" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   onClick={() => setImageMode(false)}
                   className="ml-auto p-1 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded transition-colors"
@@ -656,7 +695,7 @@ export default function ChatDemoPage() {
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
                     : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500'
                 }`}
-                title="Generate image with DALL-E 3"
+                title="Generate image with DALL-E 3 or Imagen 3"
               >
                 {imageMode ? <Wand2 className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
               </button>
