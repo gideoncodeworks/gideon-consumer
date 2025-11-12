@@ -571,67 +571,69 @@ export default function ChatDemoPage() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl w-full mx-auto px-4 md:px-6 py-4 md:py-8 pb-24 box-border">
+            <div className="w-full px-3 py-4 space-y-3 box-border">
               {currentConversation.messages.map((message, idx) => (
                 <div
                   key={message.id}
-                  className={`mb-6 animate-[fadeIn_0.3s_ease-in] ${
+                  className={`flex w-full animate-[fadeIn_0.3s_ease-in] ${
                     message.role === 'user'
-                      ? 'flex justify-end'
-                      : 'flex justify-start'
+                      ? 'justify-end'
+                      : 'justify-start'
                   }`}
                 >
                   {message.role === 'user' ? (
-                    // User Message (Bubble style)
-                    <div className="max-w-[85%] md:max-w-[80%] min-w-0">
-                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-[18px] rounded-tr-md px-4 py-3 shadow-sm break-words">
+                    // User Message (ChatGPT-style bubble)
+                    <div className="max-w-[78%] min-w-0">
+                      <div className="px-4 py-3 rounded-[22px] rounded-br-md bg-purple-600 text-white shadow-sm text-[15px] leading-[22px] break-words">
                         {message.imageUrl ? (
-                          <div className="space-y-3">
+                          <div className="space-y-2">
                             <img
                               src={message.imageUrl}
                               alt={message.content}
                               className="w-full rounded-lg shadow-lg max-w-full"
                             />
-                            <div className="text-xs text-white/90 leading-relaxed break-words">
+                            <div className="text-sm text-white/90 leading-relaxed break-words">
                               {message.content}
                             </div>
                           </div>
                         ) : (
-                          <div className="whitespace-pre-wrap text-[15px] leading-[22px] break-words overflow-wrap-anywhere">
+                          <div className="whitespace-pre-wrap break-words">
                             {message.content}
                           </div>
                         )}
                       </div>
                     </div>
                   ) : (
-                    // AI Message (Avatar + No bubble style)
-                    <div className="flex gap-3 max-w-[90%] md:max-w-[85%] min-w-0">
+                    // AI Message (ChatGPT-style with avatar)
+                    <div className="flex gap-2 max-w-[78%] min-w-0">
                       {/* Avatar */}
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                         G
                       </div>
 
                       {/* Message Content */}
-                      <div className="flex-1 pt-1 min-w-0">
-                        {message.imageUrl ? (
-                          <div className="space-y-3">
-                            <img
-                              src={message.imageUrl}
-                              alt={message.content}
-                              className="w-full rounded-lg shadow-lg max-w-full"
-                            />
-                            <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed break-words">
+                      <div className="flex-1 min-w-0">
+                        <div className="px-4 py-3 rounded-[22px] rounded-bl-md bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm text-[15px] leading-[22px] break-words">
+                          {message.imageUrl ? (
+                            <div className="space-y-2">
+                              <img
+                                src={message.imageUrl}
+                                alt={message.content}
+                                className="w-full rounded-lg shadow-lg max-w-full"
+                              />
+                              <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed break-words">
+                                {message.content}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="whitespace-pre-wrap break-words">
                               {message.content}
                             </div>
-                          </div>
-                        ) : (
-                          <div className="whitespace-pre-wrap text-[15px] md:text-sm leading-[24px] text-gray-900 dark:text-gray-100 break-words overflow-wrap-anywhere">
-                            {message.content}
-                          </div>
-                        )}
+                          )}
+                        </div>
 
                         {message.model && (
-                          <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                          <div className="mt-1 ml-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                             {message.imageUrl ? <Wand2 className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
                             {message.model}
                           </div>
@@ -643,14 +645,14 @@ export default function ChatDemoPage() {
               ))}
 
               {isStreaming && (
-                <div className="flex justify-start mb-6">
-                  <div className="flex gap-3 max-w-[90%]">
+                <div className="flex w-full justify-start">
+                  <div className="flex gap-2 max-w-[78%]">
                     {/* Avatar */}
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                    <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs shadow-sm">
                       G
                     </div>
                     {/* Typing indicator */}
-                    <div className="pt-2">
+                    <div className="px-4 py-3 rounded-[22px] rounded-bl-md bg-gray-100 dark:bg-gray-800 shadow-sm flex items-center">
                       <div className="flex gap-1">
                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                         <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -666,9 +668,9 @@ export default function ChatDemoPage() {
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
-          <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 md:py-4">
+        {/* Input Area - ChatGPT style composer */}
+        <div className="sticky bottom-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 pb-[env(safe-area-inset-bottom)]">
+          <div className="px-3 py-3">
             {imageMode && (
               <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-3 py-2 rounded-lg overflow-hidden">
                 <Wand2 className="h-4 w-4 text-purple-500 flex-shrink-0" />
@@ -725,18 +727,18 @@ export default function ChatDemoPage() {
               {/* Image Generation Button */}
               <button
                 onClick={() => setImageMode(!imageMode)}
-                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                   imageMode
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 title="Generate image with DALL-E 3 or Imagen 3"
               >
-                {imageMode ? <Wand2 className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
+                {imageMode ? <Wand2 className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
               </button>
 
-              {/* Text Input */}
-              <div className="flex-1 relative bg-gray-100 dark:bg-gray-800 rounded-[20px] px-4 py-2">
+              {/* Text Input Pill */}
+              <div className="flex-1 relative bg-gray-100 dark:bg-gray-800 rounded-[20px] px-4 py-3 shadow-sm">
                 <textarea
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
@@ -746,11 +748,11 @@ export default function ChatDemoPage() {
                       handleSend();
                     }
                   }}
-                  placeholder={imageMode ? "Describe the image you want to create..." : "Message Gideon..."}
+                  placeholder={imageMode ? "Describe the image..." : "Message…"}
                   rows={1}
-                  className="w-full bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-[15px] leading-[22px]"
+                  className="w-full bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
                   style={{
-                    minHeight: '24px',
+                    minHeight: '20px',
                     maxHeight: '100px',
                   }}
                 />
@@ -760,18 +762,25 @@ export default function ChatDemoPage() {
               <button
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isStreaming || generatingImage}
-                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:cursor-not-allowed ${
+                className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                   inputValue.trim() && !isStreaming && !generatingImage
-                    ? 'bg-purple-500 hover:bg-purple-600 text-white shadow-md active:scale-95'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white active:scale-95'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 }`}
               >
                 {generatingImage ? (
-                  <Wand2 className="h-5 w-5 animate-spin" />
+                  <Wand2 className="h-4 w-4 animate-spin" />
                 ) : imageMode ? (
-                  <Wand2 className="h-5 w-5" />
+                  <Wand2 className="h-4 w-4" />
                 ) : (
-                  <Send className="h-5 w-5" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 16 16"
+                    className="w-4 h-4"
+                  >
+                    <path d="M15.854.146a.5.5 0 0 0-.548-.105l-15 7a.5.5 0 0 0 .047.93l6.278 1.788 1.788 6.278a.5.5 0 0 0 .93.047l7-15a.5.5 0 0 0-.105-.548z" />
+                  </svg>
                 )}
               </button>
             </div>
