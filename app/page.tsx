@@ -730,7 +730,7 @@ export default function ChatDemoPage() {
                   </button>
 
                   {showImageModelPicker && (
-                    <div className="absolute bottom-full mb-2 left-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-1 min-w-[140px] z-50">
+                    <div className="absolute bottom-full mb-2 left-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-1 min-w-[140px] z-[9999]">
                       <button
                         onClick={() => {
                           setSelectedImageModel('dall-e-3');
@@ -791,7 +791,7 @@ export default function ChatDemoPage() {
                   }}
                   placeholder={imageMode ? "Describe the image..." : "Message…"}
                   rows={1}
-                  className="w-full bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm"
+                  className="w-full bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
                   style={{
                     minHeight: '20px',
                     maxHeight: '100px',
