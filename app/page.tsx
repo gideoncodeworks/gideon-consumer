@@ -689,7 +689,7 @@ export default function ChatDemoPage() {
                   </button>
 
                   {showImageModelPicker && (
-                    <div className="absolute top-full mt-1 left-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-1 min-w-[140px] z-10">
+                    <div className="absolute bottom-full mb-2 left-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl p-1 min-w-[140px] z-50">
                       <button
                         onClick={() => {
                           setSelectedImageModel('dall-e-3');
