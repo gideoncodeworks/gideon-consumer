@@ -20,6 +20,8 @@ import {
   X,
   ChevronDown,
   LogOut,
+  Image as ImageIcon,
+  Wand2,
 } from 'lucide-react';
 import { sendChatMessage } from '@/lib/chat';
 import { useAuth } from '@/lib/auth-context';
@@ -31,6 +33,8 @@ interface Message {
   content: string;
   timestamp: Date;
   model?: string;
+  imageUrl?: string;
+  type?: 'text' | 'image';
 }
 
 interface Conversation {
@@ -97,6 +101,8 @@ export default function ChatDemoPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [selectedModel, setSelectedModel] = useState('auto');
+  const [imageMode, setImageMode] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentConversation = conversations.find(c => c.id === currentConversationId);
@@ -109,8 +115,111 @@ export default function ChatDemoPage() {
     scrollToBottom();
   }, [currentConversation?.messages]);
 
+  const handleImageGeneration = async (prompt: string) => {
+    setGeneratingImage(true);
+
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: prompt,
+      timestamp: new Date(),
+      type: 'text',
+    };
+
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.id === currentConversationId
+          ? {
+              ...conv,
+              messages: [...conv.messages, userMessage],
+              updatedAt: new Date(),
+            }
+          : conv
+      )
+    );
+
+    // Create placeholder for image
+    const imageMessageId = (Date.now() + 1).toString();
+    const placeholderMessage: Message = {
+      id: imageMessageId,
+      role: 'assistant',
+      content: 'Generating image...',
+      timestamp: new Date(),
+      model: 'DALL-E 3',
+      type: 'image',
+    };
+
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.id === currentConversationId
+          ? {
+              ...conv,
+              messages: [...conv.messages, placeholderMessage],
+              updatedAt: new Date(),
+            }
+          : conv
+      )
+    );
+
+    try {
+      const response = await fetch('/api/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate image');
+      }
+
+      // Update message with generated image
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.id === currentConversationId
+            ? {
+                ...conv,
+                messages: conv.messages.map(msg =>
+                  msg.id === imageMessageId
+                    ? {
+                        ...msg,
+                        content: data.revisedPrompt || prompt,
+                        imageUrl: data.imageUrl,
+                      }
+                    : msg
+                ),
+              }
+            : conv
+        )
+      );
+    } catch (error: any) {
+      console.error('Image generation error:', error);
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.id === currentConversationId
+            ? {
+                ...conv,
+                messages: conv.messages.map(msg =>
+                  msg.id === imageMessageId
+                    ? {
+                        ...msg,
+                        content: `Failed to generate image: ${error.message}`,
+                      }
+                    : msg
+                ),
+              }
+            : conv
+        )
+      );
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
   const handleSend = async () => {
-    if (!inputValue.trim() || !currentConversation || isStreaming) return;
+    if (!inputValue.trim() || !currentConversation || isStreaming || generatingImage) return;
 
     // Check anonymous usage limit
     if (!user && anonymousMessageCount >= FREE_MESSAGE_LIMIT) {
@@ -125,11 +234,21 @@ export default function ChatDemoPage() {
       localStorage.setItem('anonymousMessageCount', newCount.toString());
     }
 
+    const currentInput = inputValue;
+    setInputValue('');
+
+    // If in image mode, generate image
+    if (imageMode) {
+      setImageMode(false); // Reset image mode
+      await handleImageGeneration(currentInput);
+      return;
+    }
+
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputValue,
+      content: currentInput,
       timestamp: new Date(),
     };
 
@@ -145,8 +264,6 @@ export default function ChatDemoPage() {
       )
     );
 
-    const currentInput = inputValue;
-    setInputValue('');
     setIsStreaming(true);
 
     // Create placeholder assistant message
@@ -439,19 +556,32 @@ export default function ChatDemoPage() {
                   }`}
                 >
                   <div
-                    className={`max-w-[80%] ${
+                    className={`${message.imageUrl ? 'max-w-[60%]' : 'max-w-[80%]'} ${
                       message.role === 'user'
                         ? 'bg-purple-500 text-white rounded-2xl rounded-tr-sm px-4 py-3'
                         : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl rounded-tl-sm px-4 py-3'
                     }`}
                   >
-                    <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {message.content}
-                    </div>
+                    {message.imageUrl ? (
+                      <div className="space-y-3">
+                        <img
+                          src={message.imageUrl}
+                          alt={message.content}
+                          className="w-full rounded-lg shadow-lg"
+                        />
+                        <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {message.content}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                        {message.content}
+                      </div>
+                    )}
 
                     {message.role === 'assistant' && message.model && (
                       <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Zap className="h-3 w-3" />
+                        {message.imageUrl ? <Wand2 className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
                         Powered by {message.model}
                       </div>
                     )}
@@ -479,9 +609,32 @@ export default function ChatDemoPage() {
         {/* Input Area */}
         <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           <div className="max-w-3xl mx-auto px-6 py-4">
+            {imageMode && (
+              <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-4 py-2 rounded-lg">
+                <Wand2 className="h-4 w-4 text-purple-500" />
+                <span className="text-gray-700 dark:text-gray-300">
+                  <strong>Image generation mode</strong> - Describe the image you want to create
+                </span>
+                <button
+                  onClick={() => setImageMode(false)}
+                  className="ml-auto p-1 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded transition-colors"
+                >
+                  <X className="h-4 w-4 text-gray-500" />
+                </button>
+              </div>
+            )}
+
             <div className="flex items-end gap-3">
-              <button className="p-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <Paperclip className="h-5 w-5 text-gray-500" />
+              <button
+                onClick={() => setImageMode(!imageMode)}
+                className={`p-2.5 rounded-lg transition-all ${
+                  imageMode
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500'
+                }`}
+                title="Generate image with DALL-E 3"
+              >
+                {imageMode ? <Wand2 className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
               </button>
 
               <div className="flex-1 relative">
@@ -494,7 +647,7 @@ export default function ChatDemoPage() {
                       handleSend();
                     }
                   }}
-                  placeholder="Message Gideon..."
+                  placeholder={imageMode ? "Describe the image you want to create..." : "Message Gideon..."}
                   rows={1}
                   className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border-0 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   style={{
@@ -506,10 +659,20 @@ export default function ChatDemoPage() {
 
               <button
                 onClick={handleSend}
-                disabled={!inputValue.trim() || isStreaming}
-                className="p-2.5 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 rounded-lg transition-colors disabled:cursor-not-allowed"
+                disabled={!inputValue.trim() || isStreaming || generatingImage}
+                className={`p-2.5 rounded-lg transition-all disabled:cursor-not-allowed ${
+                  imageMode
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg'
+                    : 'bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white'
+                }`}
               >
-                <Send className="h-5 w-5 text-white" />
+                {generatingImage ? (
+                  <Wand2 className="h-5 w-5 animate-spin" />
+                ) : imageMode ? (
+                  <Wand2 className="h-5 w-5" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
               </button>
             </div>
 
