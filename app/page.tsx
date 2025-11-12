@@ -19,8 +19,11 @@ import {
   Zap,
   X,
   ChevronDown,
+  LogOut,
 } from 'lucide-react';
 import { sendChatMessage } from '@/lib/chat';
+import { useAuth } from '@/lib/auth-context';
+import AuthModal from '@/components/AuthModal';
 
 interface Message {
   id: string;
@@ -37,7 +40,22 @@ interface Conversation {
   updatedAt: Date;
 }
 
+const FREE_MESSAGE_LIMIT = 5;
+
 export default function ChatDemoPage() {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [anonymousMessageCount, setAnonymousMessageCount] = useState(0);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+
+  // Load anonymous message count from localStorage
+  useEffect(() => {
+    if (!user) {
+      const count = parseInt(localStorage.getItem('anonymousMessageCount') || '0');
+      setAnonymousMessageCount(count);
+    }
+  }, [user]);
+
   // Sample conversations
   const [conversations, setConversations] = useState<Conversation[]>([
     {
@@ -93,6 +111,19 @@ export default function ChatDemoPage() {
 
   const handleSend = async () => {
     if (!inputValue.trim() || !currentConversation || isStreaming) return;
+
+    // Check anonymous usage limit
+    if (!user && anonymousMessageCount >= FREE_MESSAGE_LIMIT) {
+      setShowUpgradePrompt(true);
+      return;
+    }
+
+    // Increment anonymous message count
+    if (!user) {
+      const newCount = anonymousMessageCount + 1;
+      setAnonymousMessageCount(newCount);
+      localStorage.setItem('anonymousMessageCount', newCount.toString());
+    }
 
     // Add user message
     const userMessage: Message = {
@@ -238,14 +269,43 @@ export default function ChatDemoPage() {
 
         {/* Sidebar Footer */}
         <div className="p-3 border-t border-gray-200 dark:border-gray-800 space-y-1">
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300">
-            <User className="h-4 w-4" />
-            My account
-          </button>
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300">
-            <Settings className="h-4 w-4" />
-            Settings
-          </button>
+          {user ? (
+            <>
+              <div className="px-3 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-900 text-sm">
+                <div className="flex items-center gap-3 mb-1">
+                  <User className="h-4 w-4 text-gray-500" />
+                  <span className="text-gray-900 dark:text-white font-medium truncate">
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300">
+                <Settings className="h-4 w-4" />
+                Settings
+              </button>
+              <button
+                onClick={signOut}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm text-red-600 dark:text-red-400"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-purple-500 hover:bg-purple-600 transition-colors text-sm text-white font-medium"
+              >
+                <User className="h-4 w-4" />
+                Sign in
+              </button>
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors text-sm text-gray-700 dark:text-gray-300">
+                <Settings className="h-4 w-4" />
+                Settings
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -316,9 +376,23 @@ export default function ChatDemoPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              Pro Plan • 156/500 messages today
-            </div>
+            {user ? (
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Pro Plan • 156/500 messages today
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {FREE_MESSAGE_LIMIT - anonymousMessageCount} free messages left
+                </div>
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="text-xs px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
+                >
+                  Sign up for unlimited
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -440,11 +514,89 @@ export default function ChatDemoPage() {
             </div>
 
             <div className="mt-2 text-xs text-center text-gray-500 dark:text-gray-400">
+              {!user && anonymousMessageCount > 0 && anonymousMessageCount < FREE_MESSAGE_LIMIT && (
+                <div className="mb-2 flex items-center justify-center gap-2 text-purple-600 dark:text-purple-400">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>
+                    {FREE_MESSAGE_LIMIT - anonymousMessageCount} free {FREE_MESSAGE_LIMIT - anonymousMessageCount === 1 ? 'message' : 'messages'} remaining •{' '}
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="underline hover:no-underline font-medium"
+                    >
+                      Sign up for unlimited
+                    </button>
+                  </span>
+                </div>
+              )}
               Gideon can make mistakes. Check important info.
             </div>
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+
+      {/* Upgrade Prompt Modal */}
+      {showUpgradePrompt && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowUpgradePrompt(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-gray-500" />
+            </button>
+
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                You've used your free messages!
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Sign up for free to continue the conversation
+              </p>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <div className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <Check className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>Unlimited messages</strong> with all AI models
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <Check className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>Save conversations</strong> and access them anywhere
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <Check className="h-5 w-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-gray-700 dark:text-gray-300">
+                  <strong>Priority access</strong> to new features and models
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowUpgradePrompt(false);
+                setShowAuthModal(true);
+              }}
+              className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-xl"
+            >
+              Sign up for free
+            </button>
+
+            <p className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4">
+              No credit card required • Get started in 30 seconds
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
