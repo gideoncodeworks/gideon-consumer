@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -21,6 +21,7 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // Initialize analytics (only in browser)
-export const analytics = typeof window !== 'undefined' && isSupported() ? getAnalytics(app) : null;
+// Note: Analytics must be initialized asynchronously due to isSupported() returning a Promise
+export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
 
 export default app;
