@@ -571,57 +571,91 @@ export default function ChatDemoPage() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto px-6 py-8">
+            <div className="max-w-3xl mx-auto px-4 md:px-6 py-4 md:py-8 pb-24">
               {currentConversation.messages.map((message, idx) => (
                 <div
                   key={message.id}
-                  className={`mb-8 ${
+                  className={`mb-6 animate-[fadeIn_0.3s_ease-in] ${
                     message.role === 'user'
                       ? 'flex justify-end'
                       : 'flex justify-start'
                   }`}
                 >
-                  <div
-                    className={`${message.imageUrl ? 'max-w-[60%]' : 'max-w-[80%]'} ${
-                      message.role === 'user'
-                        ? 'bg-purple-500 text-white rounded-2xl rounded-tr-sm px-4 py-3'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl rounded-tl-sm px-4 py-3'
-                    }`}
-                  >
-                    {message.imageUrl ? (
-                      <div className="space-y-3">
-                        <img
-                          src={message.imageUrl}
-                          alt={message.content}
-                          className="w-full rounded-lg shadow-lg"
-                        />
-                        <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                          {message.content}
-                        </div>
+                  {message.role === 'user' ? (
+                    // User Message (Bubble style)
+                    <div className="max-w-[85%] md:max-w-[80%]">
+                      <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-[18px] rounded-tr-md px-4 py-3 shadow-sm">
+                        {message.imageUrl ? (
+                          <div className="space-y-3">
+                            <img
+                              src={message.imageUrl}
+                              alt={message.content}
+                              className="w-full rounded-lg shadow-lg"
+                            />
+                            <div className="text-xs text-white/90 leading-relaxed">
+                              {message.content}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="whitespace-pre-wrap text-[15px] leading-[22px]">
+                            {message.content}
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {message.content}
+                    </div>
+                  ) : (
+                    // AI Message (Avatar + No bubble style)
+                    <div className="flex gap-3 max-w-[90%] md:max-w-[85%]">
+                      {/* Avatar */}
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                        G
                       </div>
-                    )}
 
-                    {message.role === 'assistant' && message.model && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        {message.imageUrl ? <Wand2 className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
-                        Powered by {message.model}
+                      {/* Message Content */}
+                      <div className="flex-1 pt-1">
+                        {message.imageUrl ? (
+                          <div className="space-y-3">
+                            <img
+                              src={message.imageUrl}
+                              alt={message.content}
+                              className="w-full rounded-lg shadow-lg"
+                            />
+                            <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                              {message.content}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="whitespace-pre-wrap text-[15px] md:text-sm leading-[24px] text-gray-900 dark:text-gray-100">
+                            {message.content}
+                          </div>
+                        )}
+
+                        {message.model && (
+                          <div className="mt-2 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            {message.imageUrl ? <Wand2 className="h-3 w-3" /> : <Zap className="h-3 w-3" />}
+                            {message.model}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
 
               {isStreaming && (
-                <div className="flex justify-start mb-8">
-                  <div className="max-w-[80%] bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-sm px-4 py-3">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="flex justify-start mb-6">
+                  <div className="flex gap-3 max-w-[90%]">
+                    {/* Avatar */}
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                      G
+                    </div>
+                    {/* Typing indicator */}
+                    <div className="pt-2">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -633,8 +667,8 @@ export default function ChatDemoPage() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-          <div className="max-w-3xl mx-auto px-6 py-4">
+        <div className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+          <div className="max-w-3xl mx-auto px-4 md:px-6 py-3 md:py-4">
             {imageMode && (
               <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-4 py-2 rounded-lg">
                 <Wand2 className="h-4 w-4 text-purple-500" />
@@ -687,20 +721,22 @@ export default function ChatDemoPage() {
               </div>
             )}
 
-            <div className="flex items-end gap-3">
+            <div className="flex items-end gap-2">
+              {/* Image Generation Button */}
               <button
                 onClick={() => setImageMode(!imageMode)}
-                className={`p-2.5 rounded-lg transition-all ${
+                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                   imageMode
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500'
+                    : 'bg-transparent text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 title="Generate image with DALL-E 3 or Imagen 3"
               >
                 {imageMode ? <Wand2 className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
               </button>
 
-              <div className="flex-1 relative">
+              {/* Text Input */}
+              <div className="flex-1 relative bg-gray-100 dark:bg-gray-800 rounded-[20px] px-4 py-2">
                 <textarea
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
@@ -712,21 +748,22 @@ export default function ChatDemoPage() {
                   }}
                   placeholder={imageMode ? "Describe the image you want to create..." : "Message Gideon..."}
                   rows={1}
-                  className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border-0 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                  className="w-full bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-[15px] leading-[22px]"
                   style={{
-                    minHeight: '48px',
-                    maxHeight: '200px',
+                    minHeight: '24px',
+                    maxHeight: '100px',
                   }}
                 />
               </div>
 
+              {/* Send Button */}
               <button
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isStreaming || generatingImage}
-                className={`p-2.5 rounded-lg transition-all disabled:cursor-not-allowed ${
-                  imageMode
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg'
-                    : 'bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 text-white'
+                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all disabled:cursor-not-allowed ${
+                  inputValue.trim() && !isStreaming && !generatingImage
+                    ? 'bg-purple-500 hover:bg-purple-600 text-white shadow-md active:scale-95'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                 }`}
               >
                 {generatingImage ? (
