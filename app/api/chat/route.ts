@@ -56,6 +56,13 @@ export async function POST(req: Request) {
       ? selectBestModel(lastMessage.content)
       : requestedModel.toLowerCase();
 
+    console.log('Using model:', model);
+    console.log('API Keys present:', {
+      anthropic: !!process.env.ANTHROPIC_API_KEY,
+      openai: !!process.env.OPENAI_API_KEY,
+      google: !!process.env.GOOGLE_AI_API_KEY,
+    });
+
     // Route to appropriate AI model
     if (model === 'claude' || model.includes('claude')) {
       return await handleClaude(messages);
@@ -67,9 +74,16 @@ export async function POST(req: Request) {
       // Default to GPT-4o
       return await handleOpenAI(messages);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Chat API error:', error);
-    return new Response('Internal server error', { status: 500 });
+    console.error('Error details:', error.message, error.stack);
+    return new Response(JSON.stringify({
+      error: 'Internal server error',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
 
