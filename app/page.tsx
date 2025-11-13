@@ -713,7 +713,7 @@ export default function ChatDemoPage() {
         <div className="sticky bottom-0 z-20 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 pb-[env(safe-area-inset-bottom)]">
           <div className="px-3 py-3">
             {imageMode && (
-              <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-3 py-2 rounded-lg overflow-hidden">
+              <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-3 py-2 rounded-lg overflow-visible">
                 <Wand2 className="h-4 w-4 text-purple-500 flex-shrink-0" />
                 <span className="text-gray-700 dark:text-gray-300 min-w-0 flex-1">
                   <strong>Image mode</strong> <span className="hidden sm:inline">- Describe the image you want to create</span>
