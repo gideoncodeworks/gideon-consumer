@@ -76,7 +76,7 @@ export async function POST(req: Request) {
 // Claude handler with streaming
 async function handleClaude(messages: Message[]) {
   const stream = await anthropic.messages.stream({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-3-5-sonnet-20241022',
     max_tokens: 4096,
     messages: messages.map(msg => ({
       role: msg.role,
