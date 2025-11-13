@@ -201,7 +201,7 @@ async function handleOpenAI(messages: Message[]) {
 // Gemini handler with streaming
 async function handleGemini(messages: Message[]) {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-pro',
+    model: 'gemini-1.5-flash', // Updated from deprecated gemini-pro
     systemInstruction: GIDEON_SYSTEM_PROMPT,
   });
 
@@ -239,7 +239,7 @@ async function handleGemini(messages: Message[]) {
   return new Response(readableStream, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
-      'X-Model-Used': 'Gemini Pro',
+      'X-Model-Used': 'Gemini 1.5 Flash',
     },
   });
 }
