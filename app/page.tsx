@@ -101,10 +101,14 @@ export default function ChatDemoPage() {
   const isImageRequest = (text: string): boolean => {
     const lowerText = text.toLowerCase();
     return (
+      // Explicit image requests: "generate an image of...", "create a picture of..."
       lowerText.match(/^(generate|create|make|draw|show me|give me).*(image|picture|photo|illustration|art|artwork)/i) !== null ||
+      // Image-first: "image of...", "picture of..."
       lowerText.match(/^(image|picture|photo|illustration) of/i) !== null ||
-      lowerText.startsWith('draw ') ||
-      lowerText.startsWith('imagine ')
+      // Draw/imagine commands: "draw a...", "imagine a...", "paint a..."
+      lowerText.match(/^(draw|imagine|paint|sketch|design)\s+(me\s+)?(a|an|some)/i) !== null ||
+      // Make/create me a [visual thing]: "make me a cat", "create me a sunset"
+      lowerText.match(/^(make|create|generate)\s+me\s+(a|an|some)\s+/i) !== null
     );
   };
 
