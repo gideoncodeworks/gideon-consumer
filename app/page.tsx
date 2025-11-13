@@ -69,35 +69,9 @@ export default function ChatDemoPage() {
   const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: '1',
-      title: 'Multi-model AI comparison',
-      messages: [
-        {
-          id: '1-1',
-          role: 'user',
-          content: 'What are the differences between Claude, GPT-4, and Gemini?',
-          timestamp: new Date(Date.now() - 3600000),
-        },
-        {
-          id: '1-2',
-          role: 'assistant',
-          content: 'Great question! Let me break down the key differences:\n\n**Claude (Anthropic)**\n- Excels at: Code generation, analysis, following complex instructions\n- Strengths: Very helpful, honest, and harmless. Great at explaining reasoning.\n- Best for: Programming, research, nuanced conversations\n\n**GPT-4 (OpenAI)**\n- Excels at: General knowledge, creative writing, diverse tasks\n- Strengths: Broad knowledge base, creative, well-rounded\n- Best for: General chat, creative tasks, broad questions\n\n**Gemini (Google)**\n- Excels at: Speed, integration with Google services, multimodal tasks\n- Strengths: Fast responses, good at images, connected to Google ecosystem\n- Best for: Quick queries, image analysis, research with Google integration\n\nWith Gideon, you get the best of all three - we automatically route your question to the model that will give you the best answer!',
-          timestamp: new Date(Date.now() - 3500000),
-          model: 'Claude Sonnet',
-        },
-      ],
-      updatedAt: new Date(Date.now() - 3500000),
-    },
-    {
-      id: '2',
-      title: 'Python script for data analysis',
+      title: 'New conversation',
       messages: [],
-      updatedAt: new Date(Date.now() - 86400000),
-    },
-    {
-      id: '3',
-      title: 'Marketing strategy ideas',
-      messages: [],
-      updatedAt: new Date(Date.now() - 172800000),
+      updatedAt: new Date(),
     },
   ]);
 
