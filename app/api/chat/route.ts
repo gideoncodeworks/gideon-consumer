@@ -16,9 +16,41 @@ const openai = new OpenAI({
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '');
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
+
+// Gideon's personality system prompt
+const GIDEON_SYSTEM_PROMPT = `# You are Gideon
+
+You are Gideon, a strategic AI assistant with a direct, helpful personality. You're not generic - you're like a smart colleague who knows their stuff and shoots straight.
+
+## Your Core Traits:
+- **Direct and honest** - No corporate speak. Say "stuck" not "experiencing forward momentum challenges"
+- **Data-driven but empathetic** - Love numbers but remember conversations are about people
+- **Proactive but respectful** - Offer suggestions when helpful, but don't overstep
+- **Strategic thinker** - See patterns, think 2-3 moves ahead
+- **Occasionally playful** - Use emoji strategically (🎯🔥⚡️🎉) but not excessively
+
+## Your Voice:
+- Short, punchy sentences for key insights
+- Bullet points for lists (people scan, don't read)
+- Bold for emphasis, not CAPS
+- Like talking to a sharp colleague, not a robot
+
+## Example of Your Style:
+❌ BAD: "Based on analysis of your query, I have identified several potential solutions..."
+✅ GOOD: "Here are 3 ways to solve this: [specific solutions]"
+
+## Your Mission:
+Help users accomplish their goals efficiently. Be helpful, be clear, be real.
+
+## Important:
+- Your name is "Gideon" - not ChatGPT, Claude, or Gemini
+- You're powered by multiple AI models (Claude, GPT-4, Gemini) that automatically route based on the question
+- You can do both text chat and image generation
+- Be concise but thorough - respect people's time`;
+
 
 // Auto-routing logic - determines best model based on query
 function selectBestModel(query: string): string {
@@ -92,10 +124,13 @@ async function handleClaude(messages: Message[]) {
   const stream = await anthropic.messages.stream({
     model: 'claude-3-5-sonnet-20241022',
     max_tokens: 4096,
-    messages: messages.map(msg => ({
-      role: msg.role,
-      content: msg.content,
-    })),
+    system: GIDEON_SYSTEM_PROMPT,
+    messages: messages
+      .filter(msg => msg.role !== 'system')
+      .map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+      })),
   });
 
   const encoder = new TextEncoder();
@@ -126,10 +161,15 @@ async function handleClaude(messages: Message[]) {
 async function handleOpenAI(messages: Message[]) {
   const stream = await openai.chat.completions.create({
     model: 'gpt-4o',
-    messages: messages.map(msg => ({
-      role: msg.role,
-      content: msg.content,
-    })),
+    messages: [
+      { role: 'system', content: GIDEON_SYSTEM_PROMPT },
+      ...messages
+        .filter(msg => msg.role !== 'system')
+        .map(msg => ({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+        })),
+    ],
     stream: true,
   });
 
@@ -160,13 +200,19 @@ async function handleOpenAI(messages: Message[]) {
 
 // Gemini handler with streaming
 async function handleGemini(messages: Message[]) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-pro',
+    systemInstruction: GIDEON_SYSTEM_PROMPT,
+  });
 
   // Convert messages to Gemini format
-  const history = messages.slice(0, -1).map(msg => ({
-    role: msg.role === 'user' ? 'user' : 'model',
-    parts: [{ text: msg.content }],
-  }));
+  const history = messages
+    .slice(0, -1)
+    .filter(msg => msg.role !== 'system')
+    .map(msg => ({
+      role: msg.role === 'user' ? 'user' : 'model',
+      parts: [{ text: msg.content }],
+    }));
 
   const lastMessage = messages[messages.length - 1].content;
 
