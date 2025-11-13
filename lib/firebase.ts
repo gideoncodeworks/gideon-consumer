@@ -1,7 +1,6 @@
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,7 +9,7 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+  // measurementId removed - analytics disabled to prevent console errors
 };
 
 // Initialize Firebase (singleton)
@@ -20,8 +19,8 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Initialize analytics (only in browser)
-// Note: Analytics must be initialized asynchronously due to isSupported() returning a Promise
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
+// Analytics disabled - we don't need it for MVP and it causes console errors
+// Can be re-enabled later if needed for user tracking
+export const analytics = null;
 
 export default app;
