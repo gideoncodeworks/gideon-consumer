@@ -25,7 +25,15 @@ export default function SettingsModal({
     // Check system preference or saved preference
     const savedTheme = localStorage.getItem('theme');
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    setTheme((savedTheme as 'light' | 'dark') || systemTheme);
+    const currentTheme = (savedTheme as 'light' | 'dark') || systemTheme;
+    setTheme(currentTheme);
+
+    // Apply theme to document on load
+    if (currentTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -45,10 +53,10 @@ export default function SettingsModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full max-h-[80vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-md w-full my-auto flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Settings</h2>
           <button
             onClick={onClose}
@@ -60,7 +68,7 @@ export default function SettingsModal({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(80vh-140px)]">
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* Appearance Section */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Appearance</h3>
@@ -152,7 +160,7 @@ export default function SettingsModal({
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="p-6 border-t border-gray-200 dark:border-gray-800 flex-shrink-0">
           <button
             onClick={onClose}
             className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
