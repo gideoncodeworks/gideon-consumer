@@ -6,7 +6,6 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
 import {
   Send,
   Paperclip,
@@ -477,13 +476,8 @@ export default function ChatDemoPage() {
             </button>
 
             <div className="flex items-center gap-2 flex-shrink-0">
-              <Image
-                src="/gideon-logo.svg"
-                alt="Gideon"
-                width={100}
-                height={30}
-                className="h-7 w-auto"
-              />
+              <Sparkles className="h-5 w-5 text-purple-500" />
+              <h1 className="font-semibold text-gray-900 dark:text-white">Gideon</h1>
             </div>
 
             {/* Model Picker */}
