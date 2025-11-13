@@ -166,7 +166,17 @@ export default function ChatDemoPage() {
         body: JSON.stringify({ prompt, model: 'dall-e-3' }),
       });
 
-      const data = await response.json();
+      // Handle non-JSON responses (like 504 timeout HTML pages)
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        // If response isn't JSON, check if it's a timeout
+        if (response.status === 504) {
+          throw new Error('Image generation timed out. DALL-E 3 is taking longer than expected. Please try again.');
+        }
+        throw new Error('Failed to generate image. Please try again.');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate image');
@@ -196,7 +206,9 @@ export default function ChatDemoPage() {
 
       // Show user-friendly error message
       let errorMsg = 'Unable to generate image. Please try again.';
-      if (error.message.includes('API key')) {
+      if (error.message.includes('timed out') || error.message.includes('timeout')) {
+        errorMsg = 'Image generation is taking longer than expected. Please try again in a moment.';
+      } else if (error.message.includes('API key')) {
         errorMsg = 'Image generation service is temporarily unavailable.';
       } else if (error.message.includes('rate limit')) {
         errorMsg = 'Too many requests. Please wait a moment and try again.';

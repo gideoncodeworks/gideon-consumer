@@ -5,7 +5,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const runtime = 'edge';
+// Use Node.js runtime for longer timeout (DALL-E 3 can take 30-60 seconds)
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 second timeout for image generation
 
 export async function POST(req: NextRequest) {
   try {
