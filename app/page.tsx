@@ -20,7 +20,6 @@ import {
   X,
   ChevronDown,
   LogOut,
-  Image as ImageIcon,
   Wand2,
   Menu,
 } from 'lucide-react';
@@ -80,7 +79,6 @@ export default function ChatDemoPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [selectedModel, setSelectedModel] = useState('auto');
-  const [imageMode, setImageMode] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   // Image generation is now DALL-E 3 only (Imagen requires Vertex AI setup)
@@ -98,6 +96,17 @@ export default function ChatDemoPage() {
   useEffect(() => {
     scrollToBottom();
   }, [currentConversation?.messages, isStreaming]);
+
+  // Auto-detect if user wants to generate an image
+  const isImageRequest = (text: string): boolean => {
+    const lowerText = text.toLowerCase();
+    return (
+      lowerText.match(/^(generate|create|make|draw|show me|give me).*(image|picture|photo|illustration|art|artwork)/i) !== null ||
+      lowerText.match(/^(image|picture|photo|illustration) of/i) !== null ||
+      lowerText.startsWith('draw ') ||
+      lowerText.startsWith('imagine ')
+    );
+  };
 
   const handleImageGeneration = async (prompt: string) => {
     setGeneratingImage(true);
@@ -228,9 +237,8 @@ export default function ChatDemoPage() {
     const currentInput = inputValue;
     setInputValue('');
 
-    // If in image mode, generate image
-    if (imageMode) {
-      setImageMode(false); // Reset image mode
+    // Auto-detect if user wants to generate an image
+    if (isImageRequest(currentInput)) {
       await handleImageGeneration(currentInput);
       return;
     }
@@ -688,42 +696,7 @@ export default function ChatDemoPage() {
         {/* Input Area - ChatGPT style composer */}
         <div className="sticky bottom-0 z-20 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 pb-[env(safe-area-inset-bottom)]">
           <div className="px-3 py-3">
-            {imageMode && (
-              <div className="mb-3 flex items-center gap-2 text-sm bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 px-3 py-2 rounded-lg overflow-visible">
-                <Wand2 className="h-4 w-4 text-purple-500 flex-shrink-0" />
-                <span className="text-gray-700 dark:text-gray-300 min-w-0 flex-1">
-                  <strong>Image mode</strong> <span className="hidden sm:inline">- Describe the image you want to create</span>
-                </span>
-
-                {/* Image Model Badge (DALL-E 3 only) */}
-                <div className="ml-auto flex-shrink-0">
-                  <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-white/50 dark:bg-gray-800/50 text-xs font-medium text-gray-700 dark:text-gray-300">
-                    DALL-E 3
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setImageMode(false)}
-                  className="ml-auto p-1 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded transition-colors"
-                >
-                  <X className="h-4 w-4 text-gray-500" />
-                </button>
-              </div>
-            )}
-
             <div className="flex items-end gap-2">
-              {/* Image Generation Button */}
-              <button
-                onClick={() => setImageMode(!imageMode)}
-                className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                  imageMode
-                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-                title="Generate image with DALL-E 3 or Imagen 3"
-              >
-                {imageMode ? <Wand2 className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}
-              </button>
 
               {/* Text Input Pill */}
               <div className="flex-1 relative bg-gray-100 dark:bg-gray-800 rounded-[20px] px-4 py-3 shadow-sm">
@@ -736,7 +709,7 @@ export default function ChatDemoPage() {
                       handleSend();
                     }
                   }}
-                  placeholder={imageMode ? "Describe the image..." : "Message…"}
+                  placeholder="Message…"
                   rows={1}
                   className="w-full bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-base"
                   style={{
@@ -758,8 +731,6 @@ export default function ChatDemoPage() {
               >
                 {generatingImage ? (
                   <Wand2 className="h-4 w-4 animate-spin" />
-                ) : imageMode ? (
-                  <Wand2 className="h-4 w-4" />
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
