@@ -116,12 +116,15 @@ export default function ChatDemoPage() {
   const currentConversation = conversations.find(c => c.id === currentConversationId);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Use setTimeout to ensure DOM has updated
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto', block: 'end' });
+    }, 100);
   };
 
   useEffect(() => {
     scrollToBottom();
-  }, [currentConversation?.messages]);
+  }, [currentConversation?.messages, isStreaming]);
 
   const handleImageGeneration = async (prompt: string) => {
     setGeneratingImage(true);
