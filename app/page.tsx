@@ -47,7 +47,7 @@ interface Conversation {
   updatedAt: Date;
 }
 
-const FREE_MESSAGE_LIMIT = 5;
+const FREE_MESSAGE_LIMIT = 20; // Competitive with ChatGPT/Claude free tiers
 
 export default function ChatDemoPage() {
   const { user, loading: authLoading, signOut } = useAuth();
